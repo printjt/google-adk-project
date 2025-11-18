@@ -65,81 +65,90 @@ async def main_async():
     if not GOOGLE_API_KEY:
         print("ERROR: GOOGLE_API_KEY not found in environment variables or .env file")
         return
-    
+
     os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
-    
+
     # Print header and instructions
     print_header()
     print_instructions()
-    
+
     # Create the coordinator agent (with all sub-agents)
     console = Console()
     console.print("[cyan]🔄 Initializing MindfulAI multi-agent system...[/cyan]")
-    
+
     coordinator = create_coordinator_agent()
-    
+
     # Create ADK InMemoryRunner - handles session management automatically
     runner = InMemoryRunner(agent=coordinator, app_name="agents")
-    
+
     console.print("[green]✓ System ready! All agents initialized.[/green]")
     console.print("[dim]Using Google ADK InMemoryRunner for agent execution[/dim]")
     console.print("[dim]Agents: Triage → Crisis | Support | Resource[/dim]\n")
     console.print("[bold]Start your conversation below:[/bold]\n")
-    
+
     # Collect all messages for run_debug
     all_messages = []
-    
+
     while True:
         try:
             # Get user input
             user_input = input("\n[You]: ").strip()
-            
+
             # Exit commands
-            if user_input.lower() in ['exit', 'quit', 'q']:
-                console.print("\n[yellow]Session ended. Take care of yourself! 💙[/yellow]")
+            if user_input.lower() in ["exit", "quit", "q"]:
+                console.print(
+                    "\n[yellow]Session ended. Take care of yourself! 💙[/yellow]"
+                )
                 break
-            
+
             if not user_input:
                 continue
-            
+
             # Add message to list
             all_messages.append(user_input)
-            
+
             console.print("\n[bold cyan][MindfulAI]:[/bold cyan]\n")
-            
+
             try:
                 # Use ADK's run_debug - it handles session/history automatically
                 events = await runner.run_debug(
-                    user_messages=all_messages,
-                    quiet=True  # Suppress debug output
+                    user_messages=all_messages, quiet=True  # Suppress debug output
                 )
-                
-                # Extract and display the response
-                response_found = False
+
+                # Collect all text responses and only show the LAST one (final coordinator response)
+                all_responses = []
                 for event in events:
-                    if hasattr(event, 'content') and event.content:
-                        if hasattr(event.content, 'parts'):
+                    if hasattr(event, "content") and event.content:
+                        if hasattr(event.content, "parts"):
                             for part in event.content.parts:
-                                if hasattr(part, 'text') and part.text:
-                                    console.print(Panel(part.text, style="green"))
-                                    response_found = True
-                
-                if not response_found:
-                    console.print("[yellow]No response received. Please try again.[/yellow]")
-                
+                                if hasattr(part, "text") and part.text:
+                                    all_responses.append(part.text)
+
+                # Display only the last response (the final coordinator output)
+                if all_responses:
+                    console.print(Panel(all_responses[-1], style="green"))
+                else:
+                    console.print(
+                        "[yellow]No response received. Please try again.[/yellow]"
+                    )
+
             except Exception as run_error:
                 console.print(f"[red]Error: {str(run_error)}[/red]")
-                console.print("[yellow]Please try again. If you're in crisis, call 988 immediately.[/yellow]")
+                console.print(
+                    "[yellow]Please try again. If you're in crisis, call 988 immediately.[/yellow]"
+                )
                 # Remove failed message
                 all_messages.pop()
                 continue
-                
+
         except KeyboardInterrupt:
             console.print("\n\n[yellow]Session interrupted. Goodbye![/yellow]")
             break
         except Exception as e:
             console.print(f"\n[red]Error: {str(e)}[/red]")
-            console.print("[yellow]Please try again. If you're in crisis, call 988 immediately.[/yellow]")
+            console.print(
+                "[yellow]Please try again. If you're in crisis, call 988 immediately.[/yellow]"
+            )
 
 
 def main():

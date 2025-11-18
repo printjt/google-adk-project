@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "XXXXXXXXXXX")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "XXXXXXXXXX")
 
 # Set environment variable for ADK
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
