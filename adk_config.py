@@ -10,13 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "XXXXXXXXXX")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "XXXXXXXXX")
 
 # Set environment variable for ADK
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
 # Agent Model Configuration
-DEFAULT_MODEL = "gemini-2.0-flash-exp"
+DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
 # Crisis Keywords - Used by custom crisis detection tool
 CRISIS_KEYWORDS = [
